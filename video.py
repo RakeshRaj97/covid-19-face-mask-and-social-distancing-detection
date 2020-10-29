@@ -3,18 +3,25 @@ from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
 from tensorflow.keras.preprocessing.image import img_to_array
 from tensorflow.keras.models import load_model
 import numpy as np
+import argparse
 import imutils
 import time
 import cv2
 import math
 
-labelsPath = "Models/yolo-coco/coco.names"
+arg = argparse.ArgumentParser()
+arg.add_argument("--video", required=True, help="path to input video")
+arg.add_argument("-d", "--distance", type=float, default=100.0, help="pixels distance to calculate social distance")
+arg.add_argument("--frames", type=int, default=20, help="number of frames to skip while testing video")
+args = vars(arg.parse_args())
+
+labelsPath = "coco.names"
 LABELS = open(labelsPath).read().strip().split("\n")
 np.random.seed(42)
 COLORS = np.random.randint(0, 255, size=(len(LABELS), 3),
                            dtype="uint8")
-weightsPath = "Models/yolo-coco/yolov3.weights"
-configPath = "Models/yolo-coco/yolov3.cfg"
+weightsPath = "yolo-coco/yolov3.weights"
+configPath = "yolo-coco/yolov3.cfg"
 
 net = cv2.dnn.readNetFromDarknet(configPath, weightsPath)
 
@@ -23,21 +30,24 @@ confidence_threshold = 0.4
 
 # load our serialized face detector model from disk
 print("[INFO] loading face detector model...")
-prototxtPath = "Models/face_detector/deploy.prototxt"
-weightsPath = "Models/face_detector/res10_300x300_ssd_iter_140000.caffemodel"
+prototxtPath = "face_detector/deploy.prototxt"
+weightsPath = "face_detector/res10_300x300_ssd_iter_140000.caffemodel"
 faceNet = cv2.dnn.readNet(prototxtPath, weightsPath)
 
 # load the face mask detector model from disk
-model_store_dir= "Models/classifier.model"
+model_store_dir= "classifier.model"
 maskNet = load_model(model_store_dir)
 
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(args["video"])
+index = 0
+cnt = 0
 while (cap.isOpened()):
-    ret, image = cap.read()
+  ret, image = cap.read()
 
-    if ret == False:
-        break
-
+  if ret == False:
+      break
+  index += 1
+  if index%args["frames"] == 0:
     image = cv2.resize(image, (640, 360))
     (H, W) = image.shape[:2]
     ln = net.getLayerNames()
@@ -94,7 +104,7 @@ while (cap.isOpened()):
                 y_dist = (b[k] - b[i])
                 d = math.sqrt(x_dist * x_dist + y_dist * y_dist)
                 distance.append(d)
-                if (d <= 100.0):
+                if (d <= args["distance"]):
                     nsd.append(i)
                     nsd.append(k)
                 nsd = list(dict.fromkeys(nsd))
@@ -151,9 +161,20 @@ while (cap.isOpened()):
             cv2.putText(image, label, (startX, startY - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.45, color, 2)
             cv2.rectangle(image, (startX, startY), (endX, endY), color, 2)
             print("End of classifier")
-    cv2.imshow("Image", image)
+
+    im = cv2.resize(image, (800, 512))
+    cv2.imshow("Image", im)
+    cv2.imwrite('result_frames/'+str(cnt)+'.png', image)
+    cnt = cnt + 1
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
 cap.release()
 cv2.destroyAllWindows()
+
+
+
+#cv2.putText(image, text, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+#cv2.imshow("Image", image)
+#cv2.imwrite('output_social.jpg', image)
+#cv2.waitKey()

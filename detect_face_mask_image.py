@@ -62,4 +62,4 @@ for i in range(0, detections.shape[2]):
         cv2.rectangle(image, (startX, startY), (endX, endY), color, 2)
         print(label)
 
-cv2.imwrite("output.png", image)
+cv2.imwrite("output_fm.png", image)
