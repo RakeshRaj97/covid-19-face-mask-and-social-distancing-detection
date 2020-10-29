@@ -63,6 +63,7 @@ Ensure working of the microservice using the command **curl http://0.0.0.0:12000
 The dataset used to train face mask detector can be downloaded using this [link](https://drive.google.com/drive/folders/16PTAon5XlaosCwqKmpLF1sSO61M2yq-y?usp=sharing)
 
 This is a balanced dataset containing faces with and without masks with a mean height of 283.68 and mean width of 278.77
+
 ![data](https://user-images.githubusercontent.com/47710229/97522777-a243d080-19f4-11eb-93c9-04dea6ceec6c.png)
 
 ### Train
