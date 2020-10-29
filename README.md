@@ -69,6 +69,8 @@ This is a balanced dataset containing faces with and without masks with a mean h
 ### Train
 Use the command `python train_mask_detector.py --dataset input/dataset/path` to train the face mask classifier
 
+![plot](https://user-images.githubusercontent.com/47710229/97524430-c0abcb00-19f8-11eb-8543-816514e222f7.png)
+
 ## Output of the Trained Model
 ### Face Mask detection
 ![output_fm](https://user-images.githubusercontent.com/47710229/97523450-77f31280-19f6-11eb-8ea4-b8c7fa3f849a.png)
