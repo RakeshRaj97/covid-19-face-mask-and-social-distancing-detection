@@ -78,3 +78,8 @@ Use the command `python train_mask_detector.py --dataset input/dataset/path` to 
 ### Social Distancing detection
 ![output_sd](https://user-images.githubusercontent.com/47710229/97523489-90fbc380-19f6-11eb-90f5-864376aaaeed.jpg)
 
+#### References
+*https://www.pyimagesearch.com/2020/06/01/opencv-social-distancing-detector/
+
+*https://www.pyimagesearch.com/2020/05/04/covid-19-face-mask-detector-with-opencv-keras-tensorflow-and-deep-learning/
+
