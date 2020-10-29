@@ -1,3 +1,4 @@
+# move this file to "dataset" directory before execution
 import os
 import cv2
 import glob
