@@ -49,7 +49,7 @@ Experiment `--distance` value for different video files and `--frames` to skip f
 Use the command `python webcam.py` to test using a webcam device
 
 ### Docker for Face Mask Detection on Images
-Use the Docker image to run the face mask detector microservice 
+Use the [Docker image](https://hub.docker.com/r/rakeshraj97/project1/tags) to run the face mask detector microservice 
 
 Pull the docker image using the command **docker pull rakeshraj97/project1:0.0.1**
 
