@@ -60,3 +60,18 @@ Ensure working of the microservice using the command **curl http://0.0.0.0:12000
 
 ## Train Face Mask Detector
 ### Dataset description
+The dataset used to train face mask detector can be downloaded using this [link](https://drive.google.com/drive/folders/16PTAon5XlaosCwqKmpLF1sSO61M2yq-y?usp=sharing)
+
+This is a balanced dataset containing faces with and without masks with a mean height of 283.68 and mean width of 278.77
+![data](https://user-images.githubusercontent.com/47710229/97522777-a243d080-19f4-11eb-93c9-04dea6ceec6c.png)
+
+### Train
+Use the command `python train_mask_detector.py --dataset input/dataset/path` to train the face mask classifier
+
+## Output of the Trained Model
+### Face Mask detection
+![output_fm](https://user-images.githubusercontent.com/47710229/97523450-77f31280-19f6-11eb-8ea4-b8c7fa3f849a.png)
+
+### Social Distancing detection
+![output_sd](https://user-images.githubusercontent.com/47710229/97523489-90fbc380-19f6-11eb-90f5-864376aaaeed.jpg)
+
