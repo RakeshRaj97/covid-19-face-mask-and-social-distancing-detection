@@ -18,22 +18,13 @@ OUTPUT_FOLDER = "./static/output/"
 
 
 # load face detector model from disk
-prototxtPath = "./face_detector/deploy.prototxt"
-weightsPath = "./face_detector/res10_300x300_ssd_iter_140000.caffemodel"
+prototxtPath = "face_detector/deploy.prototxt"
+weightsPath = "face_detector/res10_300x300_ssd_iter_140000.caffemodel"
 net = cv2.dnn.readNet(prototxtPath, weightsPath)
 
 # load face mask classifier model
 model = load_model("./classifier.model")
 
-# load yolo
-labelsPath = "./coco.names"
-LABELS = open(labelsPath).read().strip().split("\n")
-np.random.seed(42)
-COLORS = np.random.randint(0, 255, size=(len(LABELS), 3),
-                           dtype="uint8")
-weightsPath_ = "./yolo-coco/yolov3.weights"
-configPath = "./yolo-coco/yolov3.cfg"
-net_ = cv2.dnn.readNetFromDarknet(configPath, weightsPath_)
 
 # face mask classifier
 def predict(image_path):
@@ -75,76 +66,6 @@ def predict(image_path):
 
     return None
 
-# social distancing detection
-def predict_sd(image_path):
-    image = cv2.imread(image_path)
-    (H, W) = image.shape[:2]
-    ln = net_.getLayerNames()
-    blob = cv2.dnn.blobFromImage(image, 1 / 255.0, (416, 416), swapRB=True, crop=False)
-    net_.setInput(blob)
-    layerOutputs = net_.forward(ln)
-    boxes = []
-    confidences = []
-    classIDs = []
-    for output in layerOutputs:
-        for detection in output:
-            scores = detection[5:]
-            classID = np.argmax(scores)
-            confidence = scores[classID]
-            if confidence > 0.5 and classID == 0:
-                box = detection[0:4] * np.array([W, H, W, H])
-                (centerX, centerY, width, height) = box.astype("int")
-                x = int(centerX - (width / 2))
-                y = int(centerY - (height / 2))
-                boxes.append([x, y, int(width), int(height)])
-                confidences.append(float(confidence))
-                classIDs.append(classID)
-
-    idxs = cv2.dnn.NMSBoxes(boxes, confidences, 0.5, 0.3)
-    ind = []
-    for i in range(0, len(classIDs)):
-        if (classIDs[i] == 0):
-            ind.append(i)
-    a = []
-    b = []
-    color = (0, 255, 0)
-    if len(idxs) > 0:
-        for i in idxs.flatten():
-            (x, y) = (boxes[i][0], boxes[i][1])
-            (w, h) = (boxes[i][2], boxes[i][3])
-            a.append(x)
-            b.append(y)
-            cv2.rectangle(image, (x, y), (x + w, y + h), color, 2)
-
-    distance = []
-    nsd = []
-    for i in range(0, len(a) - 1):
-        for k in range(1, len(a)):
-            if (k == i):
-                break
-            else:
-                x_dist = (a[k] - a[i])
-                y_dist = (b[k] - b[i])
-                d = math.sqrt(x_dist * x_dist + y_dist * y_dist)
-                distance.append(d)
-                if (d <= 100.0):
-                    nsd.append(i)
-                    nsd.append(k)
-                nsd = list(dict.fromkeys(nsd))
-
-    color = (0, 0, 255)
-    for i in nsd:
-        (x, y) = (boxes[i][0], boxes[i][1])
-        (w, h) = (boxes[i][2], boxes[i][3])
-        cv2.rectangle(image, (x, y), (x + w, y + h), color, 2)
-        text = "Alert"
-        cv2.putText(image, text, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
-
-    cv2.putText(image, text, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
-    cv2.imwrite(image_path, image)
-
-    return None
-
 
 @app.route("/", methods=["GET", "POST"])
 def upload_predict():
@@ -161,19 +82,6 @@ def upload_predict():
             return render_template("index.html", prediction=pred, image_loc=image_file.filename)
     return render_template("index.html", prediction=0, image_loc=None)
 
-@app.route("/sd", methods=["GET", "POST"])
-def upload_predict_sd():
-    if request.method == "POST":
-        image_file = request.files["image"]
-        if image_file:
-            image_location = os.path.join(
-                UPLOAD_FOLDER,
-                image_file.filename
-            )
-            image_file.save(image_location)
-            pred = predict_sd(image_location)
-            return render_template("social.html", prediction=pred, image_loc=image_file.filename)
-    return render_template("social.html", prediction=0, image_loc=None)
 
 if __name__=="__main__":
     app.run(host='0.0.0.0', port=12000)
